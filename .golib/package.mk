@@ -46,10 +46,10 @@ docs:
 	$(GO) test -run '^Example' -count=1 ./...
 
 api-compat:
-	../../scripts/check-api-baseline.sh .
+	./.golib/scripts/check-api-baseline.sh .
 
 mutation:
-	../../scripts/check-mutation.sh .
+	./.golib/scripts/check-mutation.sh .
 
 check: tidy-check format-check vet test race coverage fuzz benchmark docs \
 	api-compat
