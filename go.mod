@@ -1,3 +1,3 @@
-module github.com/faustbrian/golib/pkg/external-sort
+module github.com/faustbrian/go-external-sort
 
 go 1.26.6

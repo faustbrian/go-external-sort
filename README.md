@@ -1,5 +1,15 @@
 # external-sort
 
+[![CI](https://github.com/faustbrian/go-external-sort/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/faustbrian/go-external-sort/actions/workflows/ci.yml)
+[![CodeQL](https://img.shields.io/badge/CodeQL-required-blue)](https://github.com/faustbrian/go-external-sort/actions/workflows/ci.yml)
+[![Coverage](https://img.shields.io/badge/coverage-100%25_required-blue)](CONTRIBUTING.md#verification)
+[![Mutation](https://img.shields.io/badge/mutation-100%25_required-blue)](CONTRIBUTING.md#verification)
+[![Documentation](https://img.shields.io/badge/docs-checked_in_CI-blue)](docs/)
+[![Go Reference](https://pkg.go.dev/badge/github.com/faustbrian/go-external-sort.svg)](https://pkg.go.dev/github.com/faustbrian/go-external-sort)
+[![Release](https://img.shields.io/github/v/release/faustbrian/go-external-sort?sort=semver)](https://github.com/faustbrian/go-external-sort/releases)
+[![Go](https://img.shields.io/badge/go-1.26.6-00ADD8?logo=go)](https://go.dev/)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 `external-sort` performs bounded external sorting of fixed-size opaque records
 while encrypting every temporary record with AES-256-GCM. It is intended for
 large reconciliation and migration datasets that cannot safely be retained in

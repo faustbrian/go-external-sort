@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"os"
 
-	externalsort "github.com/faustbrian/golib/pkg/external-sort"
+	externalsort "github.com/faustbrian/go-external-sort"
 )
 
 func Example() {
