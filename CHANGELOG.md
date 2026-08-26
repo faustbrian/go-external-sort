@@ -4,6 +4,8 @@
 
 ### Documentation
 
+- Use task-oriented README headings instead of internal planning terminology.
+
 - Replace the archived monorepo link with package-owned documentation.
 
 ## 1.0.0 - 2026-08-25

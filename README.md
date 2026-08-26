@@ -71,7 +71,7 @@ fail with `ErrConcurrentUse`; callers can retry after the active operation
 returns. A record passed to the iteration callback is valid only until that
 callback returns. Copy it when retention is required.
 
-## Adoption and tradeoffs
+## When to use this package
 
 Use this module when the data is fixed-width, sorting must be bounded, and
 plaintext spill files are unacceptable. Prefer an in-memory sort for small,
