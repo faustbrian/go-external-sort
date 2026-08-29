@@ -5,8 +5,12 @@
 ### Changed
 
 - Replace the repository-local verification implementation with the pinned
-  `go-library-tools` v1.0.4 CLI and reusable workflow while preserving package
+  `go-library-tools` v1.0.6 CLI and reusable workflow while preserving package
   policy and content-addressed verification evidence.
+
+- Remove the copied verification scripts, package-manager lockfiles, and
+  repository-local tool pins; spelling policy remains in `cspell.json` while
+  the shared toolchain is owned by `go-library-tools`.
 
 ### Documentation
 
