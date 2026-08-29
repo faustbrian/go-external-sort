@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+### Changed
+
+- Replace the repository-local verification implementation with the pinned
+  `go-library-tools` v1.0.4 CLI and reusable workflow while preserving package
+  policy and content-addressed verification evidence.
+
+### Documentation
+
+- Use task-oriented README headings instead of internal planning terminology.
+
+- Replace the archived monorepo link with package-owned documentation.
+
 ## 1.0.0 - 2026-08-25
 
 ### Changed
@@ -27,7 +39,7 @@
 
 ### Documentation
 
-- Link the package README to the repository-wide Golib documentation portal.
+- Link the package README to package-owned documentation.
 
 ### Fixed
 
