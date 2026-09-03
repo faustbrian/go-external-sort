@@ -88,6 +88,10 @@ directories.
 
 ## Documentation
 
+For shared package selection, ownership, and lifecycle guidance, see the
+versioned [Golib ecosystem index](https://github.com/faustbrian/go-library-tools/blob/v1.3.0/docs/ecosystem/README.md)
+and its [Integration and data movement family](https://github.com/faustbrian/go-library-tools/blob/v1.3.0/docs/ecosystem/design-language.md#package-families-and-selection).
+
 - [API and lifecycle](docs/api.md)
 - [Architecture and file format](docs/architecture.md)
 - [Adoption and migration](docs/adoption.md)

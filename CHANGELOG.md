@@ -4,6 +4,10 @@
 
 ### Changed
 
+- Adopt the checksum-verified `go-library-tools` v1.3.0 CLI, schema-v2
+  cohesion metadata, repository-local cohesion gate, and immutable reusable
+  workflow without changing the sorting API or runtime behavior.
+
 - Replace the repository-local verification implementation with the pinned
   `go-library-tools` v1.0.6 CLI and reusable workflow while preserving package
   policy and content-addressed verification evidence.
@@ -13,6 +17,10 @@
   the shared toolchain is owned by `go-library-tools`.
 
 ### Documentation
+
+- Publish the module's family, capabilities, selection, ownership, lifecycle,
+  support, and delivery boundaries and link to the immutable v1.3.0 ecosystem
+  index and family guidance.
 
 - Use task-oriented README headings instead of internal planning terminology.
 
