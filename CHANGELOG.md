@@ -4,6 +4,11 @@
 
 ### Changed
 
+- Adopt the checksum-verified `go-library-tools` v1.4.0 CLI and immutable W14
+  reusable workflow, with matching configuration, inventory, cohesion,
+  repository, online specification, workflow, and implementation gates,
+  without changing the sorting API or runtime behavior.
+
 - Adopt the checksum-verified `go-library-tools` v1.3.0 CLI, schema-v2
   cohesion metadata, repository-local cohesion gate, and immutable reusable
   workflow without changing the sorting API or runtime behavior.
@@ -17,6 +22,9 @@
   the shared toolchain is owned by `go-library-tools`.
 
 ### Documentation
+
+- Link ecosystem and Integration and data movement family guidance to the
+  immutable v1.4.0 documentation release.
 
 - Publish the module's family, capabilities, selection, ownership, lifecycle,
   support, and delivery boundaries and link to the immutable v1.3.0 ecosystem
