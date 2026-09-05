@@ -2,6 +2,7 @@
 
 ## Getting started
 
+- [Runnable package example](../example_test.go)
 - [API](api.md)
 - [When to use this package](adoption.md)
 

@@ -23,6 +23,9 @@
 
 ### Documentation
 
+- Add the canonical module installation command and link the quick start and
+  catalog metadata to the compiler-checked runnable package example.
+
 - Link ecosystem and Integration and data movement family guidance to the
   immutable v1.4.0 documentation release.
 

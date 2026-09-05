@@ -15,34 +15,17 @@ while encrypting every temporary record with AES-256-GCM. It is intended for
 large reconciliation and migration datasets that cannot safely be retained in
 memory or written to plaintext temporary files.
 
+## Installation
+
+```sh
+go get github.com/faustbrian/go-external-sort@v1
+```
+
 ## Quick start
 
-```go
-factory, err := externalsort.NewFactory(externalsort.Config{
-    ParentDirectory: "/run/private/reconciliation",
-    RecordBytes:     32,
-    ChunkRecords:    100_000,
-    MaximumRecords:  5_000_000,
-})
-if err != nil {
-    return err
-}
-
-store, err := factory.Open(ctx, derivedAES256Key)
-if store != nil {
-    defer store.Close()
-}
-if err != nil {
-    return err
-}
-
-if err := store.Add(ctx, digest[:]); err != nil {
-    return err
-}
-return store.ForEachSorted(ctx, func(record []byte) error {
-    return consume(record)
-})
-```
+See the [compiler-checked package example](example_test.go) for a complete
+runnable setup that creates a store, adds fixed-width records, consumes them in
+sorted order, and closes all owned resources.
 
 The parent directory must already exist, must not be a symlink, and must have
 no group or other permission bits. Existing ancestor links are resolved when
