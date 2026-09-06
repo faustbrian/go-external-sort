@@ -23,6 +23,9 @@
 
 ### Documentation
 
+- Add direct support navigation and document that the module exposes only the
+  root `externalsort` package, with no subpackages or optional adapter modules.
+
 - Add the canonical module installation command and link the quick start and
   catalog metadata to the compiler-checked runnable package example.
 

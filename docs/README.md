@@ -9,6 +9,7 @@
 ## Concepts and design
 
 - [Architecture](architecture.md)
+- [Module and package map](../README.md#module-and-package-map)
 
 ## Operations and security
 
@@ -20,5 +21,6 @@
 
 - [Compatibility](compatibility.md)
 - [FAQ](faq.md)
+- [Support](../SUPPORT.md)
 - [Contribution guide](../CONTRIBUTING.md)
 - [Release history](../CHANGELOG.md)
