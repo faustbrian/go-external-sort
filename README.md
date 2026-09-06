@@ -33,6 +33,12 @@ the factory is created; each store binds the resolved directory to a rooted
 handle and rejects later identity or permission changes. The key must contain
 exactly 32 bytes.
 
+## Module and package map
+
+This repository contains one Go module,
+`github.com/faustbrian/go-external-sort`, with the sole public root package
+`externalsort`. It has no subpackages or optional adapter modules.
+
 ## Guarantees
 
 - fixed record size and explicit total-record limit;
@@ -83,6 +89,7 @@ and its [Integration and data movement family](https://github.com/faustbrian/go-
 - [Performance](docs/performance.md)
 - [Operations and Kubernetes](docs/operations.md)
 - [FAQ](docs/faq.md)
+- [Support](SUPPORT.md)
 - [Security policy](SECURITY.md)
 - [Release notes](CHANGELOG.md)
 
