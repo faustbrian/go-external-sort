@@ -1,6 +1,6 @@
 # Compatibility
 
-The stable v1 module requires Go 1.26.6 or newer.
+The stable v1 module requires Go 1.27.0 or newer.
 `Factory.Open` is unavailable on `js` and `plan9`, where `os.Root` cannot
 provide the rename-stable containment required by the storage contract.
 
