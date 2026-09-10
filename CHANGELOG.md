@@ -4,6 +4,8 @@
 
 ### Changed
 
+- Require Go 1.27.0 and use it for development and CI verification.
+
 - Adopt the checksum-verified `go-library-tools` v1.4.0 CLI and immutable W14
   reusable workflow, with matching configuration, inventory, cohesion,
   repository, online specification, workflow, and implementation gates,

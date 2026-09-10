@@ -1,3 +1,3 @@
 module github.com/faustbrian/go-external-sort
 
-go 1.26.6
+go 1.27.0
