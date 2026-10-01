@@ -2,12 +2,16 @@
 
 ## Unreleased
 
+## 1.1.0 - 2026-10-01
+
 ### Changed
 
 - Keep reusable CI and its checked-out tooling on the same v1.8.4 source
   while retaining the checksum-verified v1.4.0 CLI bootstrap.
 
-- Require Go 1.27.0 and use it for development and CI verification.
+- Require Go 1.27.0 instead of Go 1.26.6. Upgrade consumer toolchains
+  before adopting v1.1.0; sorting APIs, runtime behavior, and private chunk
+  formats are unchanged. The minor release signals the toolchain transition.
 
 - Adopt the checksum-verified `go-library-tools` v1.4.0 CLI and immutable W14
   reusable workflow, with matching configuration, inventory, cohesion,
@@ -70,7 +74,7 @@
 
 ### Documentation
 
-- Link the package README to package-owned documentation.
+- Link the package README to the repository-wide Golib documentation portal.
 
 ### Fixed
 
