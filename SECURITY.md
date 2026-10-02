@@ -1,7 +1,12 @@
 # Security policy
 
-Report vulnerabilities privately to the repository owner. Reports must not
-contain production keys, records, paths, or customer data.
+Do not open a public issue for a suspected vulnerability. Report it privately
+through [GitHub Security Advisories](https://github.com/faustbrian/go-external-sort/security/advisories/new).
+Include affected versions, impact, and a minimal safe reproduction. Reports
+must not contain production keys, records, paths, or customer data.
+
+The versioned [threat model](docs/threat-model.md) maps attacker-controlled
+inputs, existing boundary coverage, and caller-owned residual risks.
 
 ## Security properties
 

@@ -16,6 +16,7 @@
 - [Operations](operations.md)
 - [Performance](performance.md)
 - [Threat model](threat-model.md)
+- [Private vulnerability reporting and security policy](../SECURITY.md)
 
 ## Reference and maintenance
 
