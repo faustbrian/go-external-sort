@@ -638,7 +638,7 @@ func (store *Store) spill(ctx context.Context) (result error) {
 			store.nonceDomain,
 			chunkIndex,
 			uint64(recordIndex),
-			uint64(store.config.RecordBytes),
+			uint64(store.config.RecordBytes), // #nosec G115 -- Factory and Store admission require 1 <= RecordBytes <= MaximumRecordBytes (1 MiB).
 		)
 		encrypted := store.cipher.Seal(nil, nonce, plaintext, aad)
 		record := append(nonce, encrypted...)
@@ -682,7 +682,7 @@ func (store *Store) openReaders() ([]*chunkReader, error) {
 			nonceDomain:     store.nonceDomain,
 			recordBytes:     store.config.RecordBytes,
 			chunkIndex:      uint64(index),
-			expectedRecords: uint64(store.expectedChunkRecords(index)),
+			expectedRecords: uint64(store.expectedChunkRecords(index)), // #nosec G115 -- Finalized successful chunks contain 1..ChunkRecords records; admission caps ChunkRecords at one million and fan-in at 64.
 		})
 	}
 
@@ -888,7 +888,7 @@ func (reader *chunkReader) next() ([]byte, error) {
 		reader.nonceDomain,
 		reader.chunkIndex,
 		reader.recordIndex,
-		uint64(reader.recordBytes),
+		uint64(reader.recordBytes), // #nosec G115 -- Private readers receive the admitted positive RecordBytes <= 1 MiB; stored bytes cannot change this field.
 	)
 	plaintext, err := reader.cipher.Open(
 		nil,

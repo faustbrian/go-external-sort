@@ -88,6 +88,17 @@ attacks within approved bounds are outside scope.
 
 ## Owned residual risks
 
+The three exact-site Gosec G115 annotations cover signed-to-unsigned
+conversions already bounded by public construction and lifecycle admission.
+Factory and Store validation require record size in `1..MaximumRecordBytes`
+(1 MiB); private readers inherit this value, not a field decoded from storage.
+Readers are opened only for successfully spilled, finalized chunks, whose
+record counts lie in `1..ChunkRecords` (at most one million). The admitted
+64-file fan-in bounds chunk-index arithmetic on supported platforms. External-sort
+maintainers own these rationales and must recheck them whenever configuration
+admission, spill rollback/finalization, reader construction or bounds change.
+These annotations do not suppress other sites or remove strict Gosec checking.
+
 These are conditional limitations, not acceptance of a deployment with
 unbounded attacker work or a claim that the entire security goal has passed.
 
