@@ -8,6 +8,10 @@ must not contain production keys, records, paths, or customer data.
 The versioned [threat model](docs/threat-model.md) maps attacker-controlled
 inputs, existing boundary coverage, and caller-owned residual risks.
 
+Acknowledgement, severity assessment, remediation, embargo, advisories and
+coordinated releases follow the versioned
+[ecosystem vulnerability-management process](https://github.com/faustbrian/go-library-tools/blob/77bfd78c12a853f0d490bb27a3fbcb5f34330772/docs/ecosystem/security/vulnerability-management.md).
+
 ## Security properties
 
 Temporary records are encrypted independently with AES-256-GCM. Each nonce
