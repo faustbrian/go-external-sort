@@ -19,9 +19,10 @@ cleanup confined to the selected parent. Keys, plaintext records, temporary
 paths, and retained ciphertext can be sensitive.
 
 An attacker can supply records through the application and alter ciphertext
-if it can reach storage. Trusted caller policy selects the existing absolute
-parent directory, AES-256 key, record/chunk/population limits, context, and
-output callback. The parent and process must be protected from hostile writers;
+if it can reach storage. The caller supplies the AES-256 encryption key.
+Trusted caller policy selects the existing absolute parent directory,
+record/chunk/population limits, context, and output callback.
+The parent and process must be protected from hostile writers;
 owner-only permission bits do not authenticate an application tenant.
 
 Owned consumers are the executable example and package tests. The only direct
