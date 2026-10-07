@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## 1.1.1 - 2026-10-07
+
+### Changed
+
+- Refresh the shared CI workflow while retaining the configured CLI and
+  separate native security qualification path.
+- Clarify encrypted-storage security boundaries and document admitted
+  integer-conversion bounds without changing sorting or chunk formats.
+
 ## 1.1.0 - 2026-10-01
 
 ### Changed
