@@ -26,10 +26,10 @@ permissions:
 jobs:
   ci:
     if: github.event_name != 'workflow_dispatch' || !inputs.native_security_qualification
-    uses: faustbrian/go-library-tools/.github/workflows/library-ci.yml@f173deb9a9b501c85137a00fa9cccd5287f8cc26 # v2.0.0 patched documentation tooling
+    uses: faustbrian/go-library-tools/.github/workflows/library-ci.yml@e79bb570d242fac90be99a6959e3b45de89279dd # v2.1.0
     with:
-      tooling_sha: f173deb9a9b501c85137a00fa9cccd5287f8cc26
-      source_bootstrap: true
+      tooling_sha: e79bb570d242fac90be99a6959e3b45de89279dd
+      source_bootstrap: false
       public_dependencies: true
       release_dry_run: ${{ inputs.release_dry_run || false }}
 
@@ -80,12 +80,12 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: faustbrian/go-library-tools
-          ref: 67b405ff04390d044e239cfd737c45ceb5e60447
+          ref: eff8b2127c361ee2f422123824a1d337cc277ac4
           path: verifier-tooling
           persist-credentials: false
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
-          go-version: '1.27.0'
+          go-version: '1.27.2'
           cache: false
       - name: Build development qualification tooling
         timeout-minutes: 15

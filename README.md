@@ -3,7 +3,7 @@
 [![CI](https://github.com/faustbrian/go-external-sort/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/faustbrian/go-external-sort/actions/workflows/ci.yml)
 [![CodeQL](https://img.shields.io/badge/CodeQL-required-blue)](https://github.com/faustbrian/go-external-sort/actions/workflows/ci.yml)
 [![Coverage](https://img.shields.io/badge/coverage-100%25_required-blue)](CONTRIBUTING.md#verification)
-[![Mutation](https://img.shields.io/badge/mutation-100%25_required-blue)](CONTRIBUTING.md#verification)
+[![Mutation](https://img.shields.io/badge/mutation-local_or_scheduled-blue)](CONTRIBUTING.md#verification)
 [![Documentation](https://img.shields.io/badge/docs-checked_in_CI-blue)](docs/)
 [![Go Reference](https://pkg.go.dev/badge/github.com/faustbrian/go-external-sort.svg)](https://pkg.go.dev/github.com/faustbrian/go-external-sort)
 [![Release](https://img.shields.io/github/v/release/faustbrian/go-external-sort?sort=semver)](https://github.com/faustbrian/go-external-sort/releases)
@@ -92,6 +92,16 @@ and its [Integration and data movement family](https://github.com/faustbrian/go-
 - [Support](SUPPORT.md)
 - [Security policy](SECURITY.md)
 - [Release notes](CHANGELOG.md)
+
+## Development
+
+Use Go 1.27.2 for development; the public minimum remains Go 1.27.0.
+Ordinary `go test ./...` works in a standalone checkout. `make check` and
+`make ci` use bounded local checks with the public pinned verifier and a focused
+race selection for lifecycle exclusion, cancellation and reader cleanup.
+`make check-full` retains online specification checks and full configured
+assurance. See [CONTRIBUTING.md](CONTRIBUTING.md#verification) for focused
+two-second fuzzing, optional root-package mutation and selected release checks.
 
 ## License
 
