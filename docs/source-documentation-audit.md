@@ -105,3 +105,11 @@ benchmarks, release and consumer execution were not run for this prose-only pass
 All task-owned Go caches and generated execution output were removed.
 Shared objective checker/CI adoption, remote-main delivery and applicable hosted
 CI remain coordinator-owned and are not claimed by this local audit.
+
+## Objective enforcement adoption
+
+The local `source-docs-check` target is required by ordinary/full checks and CI.
+Ordinary shared CI uses `source_documentation: check` with the immutable Tools
+v2.4.0 workflow and matching authenticated binary/checksum declaration; the
+separate native-security diagnostic retains its qualified source identity.
+Structural checks do not replace this audit or native docs/examples.
