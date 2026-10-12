@@ -349,6 +349,9 @@ func TestRecordHeapUsesStrictRecordAndReaderOrdering(t *testing.T) {
 	}
 }
 
+// fixedAEAD deliberately ignores authentication so framing tests can isolate
+// wrong plaintext sizes. Cryptographic rejection is covered with real AES-GCM
+// elsewhere; this fixture must not be treated as a cryptographic oracle.
 type fixedAEAD struct {
 	plaintext []byte
 }

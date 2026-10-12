@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### Documentation
+
+- Clarify fixed-record ordering, borrowed plaintext, partial output, lifecycle
+  admission, cooperative cancellation and retryable cleanup in package/API docs.
+- Document allocation, rooted storage, nonce consumption and authenticated
+  framing invariants; correct the nonce/domain diagram to match current bytes.
+
 ## 1.1.1 - 2026-10-07
 
 ### Changed

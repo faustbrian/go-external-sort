@@ -1660,6 +1660,8 @@ type errorReader struct {
 	err error
 }
 
+// zeroReader models repeated entropy to separate authenticated store identity
+// checks from the process-domain uniqueness mechanism. It is not a production RNG.
 type zeroReader struct{}
 
 func (zeroReader) Read(destination []byte) (int, error) {
@@ -1705,6 +1707,8 @@ func (writer *scriptedWriter) Write([]byte) (int, error) {
 	return step.count, step.err
 }
 
+// fakeChunkFile injects individual IO failures without exposing native paths
+// through public sentinels; Close still attempts to release a supplied reader.
 type fakeChunkFile struct {
 	name       string
 	reader     io.Reader

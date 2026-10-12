@@ -658,6 +658,8 @@ type oneByteReader struct {
 	reader io.Reader
 }
 
+// partialFailureChunkFile lets the nonce escape in a short write before failure;
+// a retry must consume a different counter even if the original file is removed.
 type partialFailureChunkFile struct {
 	name     string
 	contents bytes.Buffer

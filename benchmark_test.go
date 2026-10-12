@@ -7,6 +7,10 @@ import (
 	"testing"
 )
 
+// BenchmarkEncryptedExternalSort measures 4,096 deterministic 32-byte records
+// in 512-record chunks, including factory/store construction, encryption, local
+// filesystem IO, merge and Close. Parent/key/input setup is excluded. Compare
+// samples only with equivalent corpus, toolchain and filesystem conditions.
 func BenchmarkEncryptedExternalSort(b *testing.B) {
 	const records = 4096
 

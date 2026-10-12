@@ -191,6 +191,8 @@ func TestStoreRejectsCloseDuringCorruptionDetection(t *testing.T) {
 	}
 }
 
+// blockingReadChunkFile holds the first read at a deterministic boundary so
+// the test can inspect lifecycle exclusion before releasing corruption detection.
 type blockingReadChunkFile struct {
 	chunkFile
 	once    sync.Once

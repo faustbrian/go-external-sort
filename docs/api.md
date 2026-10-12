@@ -16,9 +16,10 @@ rejected before `Open`.
 directory handle, and creates a new owner-only work directory relative to that
 handle. Parent replacement or permission changes make `Open` fail closed. The
 factory is safe for concurrent use. Each returned `Store` permits one active
-lifecycle operation; an overlapping or callback-reentrant `Add`,
-`ForEachSorted`, or `Close` returns `ErrConcurrentUse` without changing the
-active operation.
+lifecycle operation. While the store is open, overlapping or callback-reentrant
+calls return `ErrConcurrentUse` without changing the active operation. Once
+closing begins, `Add` and `ForEachSorted` return `ErrClosed`; an overlapping
+`Close` still returns `ErrConcurrentUse`.
 
 `Open` normally returns either a usable Store or a nil Store with an error. If
 construction creates a directory but its immediate cleanup also fails, `Open`
@@ -30,7 +31,11 @@ keeps retryable ownership of the rooted residue.
 `Store.Add` copies one exact-size record. A failed call does not retain its
 input. `Store.ForEachSorted` finalizes input and invokes the callback in
 lexicographic byte order. Duplicate records remain distinct. Callback slices
-are ephemeral and must be copied before retention.
+are cleared after each callback and must be copied before retention. Output is
+not atomic: a later failure may follow records already yielded. Callback errors
+pass through unchanged; callback panics propagate after plaintext clearing and
+reader-close attempts. Cancellation is cooperative and cannot interrupt a
+blocked callback, synchronous IO, entropy read or in-memory sort.
 
 `ForEachSorted` can be called once after pending input is successfully spilled.
 It remains finalized after callback, authentication, merge-storage, or merge
@@ -43,7 +48,7 @@ calls are idempotent. After an overlapping call returns `ErrConcurrentUse`,
 retry only after the active operation has returned.
 
 Errors are compared with `errors.Is`. Context cancellation is returned
-directly. Other public error values distinguish invalid configuration, unsafe
+directly. Owned sentinel errors distinguish invalid configuration, unsafe
 parents, invalid keys and records, limit exhaustion, concurrent or finalized
 lifecycle misuse, entropy, storage, and authenticated corruption without
 exposing sensitive values.

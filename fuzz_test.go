@@ -12,6 +12,9 @@ import (
 	"testing"
 )
 
+// FuzzRecordBufferSort admits 1..64-byte records from at most 4 KiB of complete
+// input records, comparing the contiguous sort with a separately sliced
+// lexicographic reference while retaining duplicate multiplicity.
 func FuzzRecordBufferSort(f *testing.F) {
 	f.Add(byte(4), []byte{3, 3, 3, 3, 1, 1, 1, 1})
 	f.Add(byte(1), []byte{2, 1, 2, 1})
@@ -48,6 +51,9 @@ func FuzzRecordBufferSort(f *testing.F) {
 	})
 }
 
+// FuzzConfigurationBounds compares pure configuration admission with the
+// declared size/product/rounded-fan-in bounds. It opens no filesystem and does
+// not establish parent permissions or containment.
 func FuzzConfigurationBounds(f *testing.F) {
 	f.Add(uint32(1), uint32(1), uint32(1), true)
 	f.Add(uint32(MaximumRecordBytes), uint32(256), uint32(256), true)
@@ -92,6 +98,9 @@ func FuzzConfigurationBounds(f *testing.F) {
 	})
 }
 
+// FuzzEncryptedChunkFraming bounds input to 4 KiB and compares one four-byte
+// record against direct AEAD authentication. It checks exact EOF/trailing framing
+// using an in-memory reader, not real IO failures or crash behavior.
 func FuzzEncryptedChunkFraming(f *testing.F) {
 	const recordBytes = 4
 
@@ -158,6 +167,9 @@ func FuzzEncryptedChunkFraming(f *testing.F) {
 	})
 }
 
+// FuzzMergeHistories distributes at most 128 one-byte records over 1..8
+// authenticated in-memory sorted chunks and compares merged multiplicity/order
+// with a whole-input reference sort. It does not exercise filesystem ownership.
 func FuzzMergeHistories(f *testing.F) {
 	f.Add(byte(3), []byte{9, 1, 4, 1, 5, 9})
 	f.Add(byte(8), []byte{})

@@ -14,14 +14,14 @@ seals the store until `Close` succeeds.
 Every record is encoded independently as:
 
 ```text
-random GCM nonce || AES-256-GCM ciphertext || GCM authentication tag
+store-domain/counter nonce || AES-256-GCM ciphertext || GCM authentication tag
 ```
 
 The authenticated data is:
 
 ```text
-"extsort1" || 32-byte store identity || uint64(chunk) ||
-uint64(record ordinal) || uint64(record bytes)
+"extsort1" || 32-byte store identity || uint64(nonce domain) ||
+uint64(chunk) || uint64(record ordinal) || uint64(record bytes)
 ```
 
 All integers use big-endian encoding. The fixed encrypted record length allows

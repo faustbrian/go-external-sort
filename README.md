@@ -29,8 +29,9 @@ sorted order, and closes all owned resources.
 
 The parent directory must already exist, must not be a symlink, and must have
 no group or other permission bits. Existing ancestor links are resolved when
-the factory is created; each store binds the resolved directory to a rooted
-handle and rejects later identity or permission changes. The key must contain
+the factory is created. Opening a store binds the resolved directory to a
+rooted handle and revalidates its recorded identity and permissions; subsequent
+storage and cleanup remain relative to that handle. The key must contain
 exactly 32 bytes.
 
 ## Module and package map
@@ -55,10 +56,11 @@ This repository contains one Go module,
   renamed or replaced parent pathname ancestor; and
 - complete temporary-directory removal after a successful `Close`.
 
-Stores permit one active lifecycle operation. Overlapping or reentrant calls
-fail with `ErrConcurrentUse`; callers can retry after the active operation
-returns. A record passed to the iteration callback is valid only until that
-callback returns. Copy it when retention is required.
+Stores permit one active lifecycle operation. While open, overlapping or
+reentrant calls fail with `ErrConcurrentUse`; callers can retry after the active
+operation returns. Once closing begins, input and iteration return `ErrClosed`.
+A record passed to the iteration callback is valid only until that callback
+returns. Copy it when retention is required.
 
 ## When to use this package
 

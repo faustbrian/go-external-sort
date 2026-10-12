@@ -19,6 +19,9 @@ const (
 	processHelperParent      = "EXTERNAL_SORT_PROCESS_PARENT"
 )
 
+// TestProcessLifecycleHelper runs only when explicitly selected in a child
+// process. Signal and umask changes stay in that child; abrupt termination
+// intentionally leaves ciphertext for the parent test's controlled cleanup.
 func TestProcessLifecycleHelper(t *testing.T) {
 	mode := os.Getenv(processHelperEnvironment)
 	if mode == "" {

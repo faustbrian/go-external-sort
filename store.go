@@ -1,5 +1,16 @@
-// Package externalsort provides bounded external sorting for fixed-size
-// records encrypted at rest in owner-only temporary storage.
+// Package externalsort sorts fixed-size records in lexicographic byte order
+// using bounded chunks encrypted with AES-256-GCM in owner-only temporary storage.
+// Start with NewFactory and Factory.Open, add records, iterate once with
+// Store.ForEachSorted, and close every non-nil Store, even after a failed Open.
+// Callback records are borrowed plaintext and must be copied before retention.
+//
+// The package owns per-store storage and cleanup, not record encoding, key
+// derivation, atomic output publication or crash recovery. Callers must protect
+// process memory, isolate a trusted parent directory and coordinate shutdown.
+// Context cancellation is cooperative; it cannot interrupt synchronous IO,
+// entropy reads, sorting or a blocked callback. No goroutines, external service
+// or cgo are introduced. Factory.Open refuses js and plan9 because rooted
+// filesystem containment is unavailable there.
 package externalsort
 
 import (
@@ -44,36 +55,62 @@ const (
 )
 
 var (
+	// ErrInvalidConfiguration reports invalid bounds, nil required inputs or an
+	// unconstructed Factory/Store.
 	ErrInvalidConfiguration = errors.New(
 		"external sort configuration is invalid",
 	)
+	// ErrUnsafeParent reports a missing, replaced or insufficiently restricted
+	// parent directory, or a platform without supported rooted containment.
 	ErrUnsafeParent = errors.New(
 		"external sort parent is not an owner-only directory",
 	)
-	ErrInvalidKey       = errors.New("external sort key is invalid")
-	ErrInvalidRecord    = errors.New("external sort record is invalid")
-	ErrRecordLimit      = errors.New("external sort record limit reached")
-	ErrConcurrentUse    = errors.New("external sort store is already in use")
-	ErrClosed           = errors.New("external sort store is closed")
-	ErrFinalized        = errors.New("external sort store is finalized")
-	ErrEntropy          = errors.New("external sort entropy failed")
-	ErrStorage          = errors.New("external sort storage failed")
+	// ErrInvalidKey reports a key whose length is not AES256KeyBytes.
+	ErrInvalidKey = errors.New("external sort key is invalid")
+	// ErrInvalidRecord reports a record whose length differs from Config.RecordBytes.
+	ErrInvalidRecord = errors.New("external sort record is invalid")
+	// ErrRecordLimit reports an Add beyond Config.MaximumRecords.
+	ErrRecordLimit = errors.New("external sort record limit reached")
+	// ErrConcurrentUse reports overlap with an active store lifecycle operation.
+	ErrConcurrentUse = errors.New("external sort store is already in use")
+	// ErrClosed reports input or iteration attempted after closing begins,
+	// including cleanup-only handles returned by a failed Open.
+	ErrClosed = errors.New("external sort store is closed")
+	// ErrFinalized reports input or iteration attempted after finalization.
+	ErrFinalized = errors.New("external sort store is finalized")
+	// ErrEntropy reports failed randomness or exhausted nonce uniqueness state.
+	ErrEntropy = errors.New("external sort entropy failed")
+	// ErrStorage reports owned IO or cleanup failure without exposing paths
+	// or wrapping underlying filesystem errors.
+	ErrStorage = errors.New("external sort storage failed")
+	// ErrCorrupt reports invalid encrypted framing or authentication,
+	// including unexpected truncation or trailing bytes.
 	ErrCorrupt          = errors.New("external sort chunk is corrupt")
 	processNonceDomains = nonceDomainAllocator{entropy: rand.Reader}
 )
 
-// Config declares every storage and memory bound before temporary storage is
-// opened. MaximumRecords divided into ChunkRecords MUST fit one merge of at
-// most MaximumMergeFiles.
+// Config declares per-store storage and buffer bounds. There are no defaults;
+// the zero value is invalid. These bounds do not limit process-wide memory,
+// caller copies, cryptographic scratch or the number of concurrent stores.
 type Config struct {
+	// ParentDirectory is an existing absolute directory with no group/other
+	// permission bits. Its final component must not be a symlink; ancestor
+	// links are resolved at construction. The caller must exclude hostile writers.
 	ParentDirectory string
-	RecordBytes     int
-	ChunkRecords    int
-	MaximumRecords  int
+	// RecordBytes is the exact positive record width, at most MaximumRecordBytes.
+	RecordBytes int
+	// ChunkRecords is the positive in-memory record capacity, at most
+	// MaximumChunkRecords. RecordBytes * ChunkRecords must fit MaximumChunkBytes.
+	ChunkRecords int
+	// MaximumRecords is the total input ceiling, at least ChunkRecords.
+	// The rounded-up chunk count must not exceed MaximumMergeFiles.
+	MaximumRecords int
 }
 
-// Factory validates a reusable external-sort storage policy. Factory is safe
-// for concurrent use. Each Store permits one active lifecycle operation.
+// Factory holds a validated reusable policy and parent-directory identity.
+// Obtain it from NewFactory; its zero value cannot Open a store. It is safe for
+// concurrent Open calls, which create independent stores. The factory owns no
+// open directory handle or Close obligation; every store owns its own resources.
 type Factory struct {
 	config          Config
 	parentInfo      os.FileInfo
@@ -107,8 +144,13 @@ func (Factory) MarshalJSON() ([]byte, error) {
 	return []byte(redactedJSON), nil
 }
 
-// NewFactory validates bounds and requires an existing non-symlink parent
-// whose group and other permission bits are clear.
+// NewFactory copies config after validating its bounds and existing absolute
+// parent directory. The final parent component must not be a symlink and its
+// group/other permission bits must be clear. Existing ancestor links are resolved
+// once; Open revalidates the resolved directory's identity and permissions.
+// Invalid bounds return nil and ErrInvalidConfiguration; filesystem/parent
+// validation failures return nil and ErrUnsafeParent without revealing paths.
+// No OS-owner or hostile-writer isolation check is performed.
 func NewFactory(config Config) (*Factory, error) {
 	if !validConfig(config) {
 		return nil, ErrInvalidConfiguration
@@ -143,11 +185,23 @@ func NewFactory(config Config) (*Factory, error) {
 	}, nil
 }
 
-// Open creates one owner-only temporary work directory. The caller provides
-// an AES-256 key for immediate cipher construction. The caller MUST call Close
-// whenever Open returns a non-nil Store, including together with an error; an
-// error result can carry ownership of construction residue whose first removal
-// attempt failed.
+// Open creates an independent store with a rooted parent handle, owner-only
+// work directory and bounded plaintext buffer. ctx must be non-nil and key must
+// have AES256KeyBytes bytes; nil/zero factories return ErrInvalidConfiguration.
+// Key bytes are consumed during cipher construction, not retained as the input
+// slice. Do not mutate key during Open. The caller owns its lifetime; cipher
+// schedules are not securely erased. Use an independently derived key per
+// dataset across processes/restarts.
+//
+// Open checks cancellation cooperatively and returns context errors directly.
+// Parent validation, entropy and storage failures use ErrUnsafeParent,
+// ErrEntropy and ErrStorage. On js/plan9, rooted storage returns ErrUnsafeParent.
+// These errors do not wrap sensitive underlying IO values.
+//
+// The caller must Close every non-nil Store, including one returned with an
+// error: failed construction cleanup can leave an owned cleanup-only handle.
+// Such a handle rejects Add/ForEachSorted with ErrClosed and retries removal
+// through Close. A nil Store transfers no resource ownership.
 func (factory *Factory) Open(
 	ctx context.Context,
 	key []byte,
@@ -261,14 +315,22 @@ func (factory *Factory) Open(
 	return &Store{storeState: state}, nil
 }
 
-// Store owns encrypted temporary chunks for one sort. Overlapping or reentrant
-// lifecycle calls return ErrConcurrentUse. A record passed to the ForEachSorted
-// callback is valid only until that callback returns.
+// Store owns encrypted temporary chunks for one sort; obtain it from Factory.Open.
+// Its zero value is invalid. Copies of Store share the same lifecycle and
+// resources; they are not independent sorts. The caller owns Close.
+//
+// One lifecycle operation is admitted at a time. While open, overlap/reentry
+// returns ErrConcurrentUse; input/iteration after closing begins returns
+// ErrClosed. Close also rejects overlap and does not interrupt active
+// work. No store lock is held across IO or callbacks and no goroutine starts.
+// Callback records are borrowed plaintext, cleared when the callback returns.
 type Store struct {
 	*storeState
 }
 
 type storeState struct {
+	// mutex owns lifecycle admission; busy grants exclusive access to mutable
+	// records/IO state without holding the mutex across storage or user code.
 	mutex         sync.Mutex
 	config        Config
 	nameEntropy   io.Reader
@@ -317,9 +379,18 @@ func (Store) MarshalJSON() ([]byte, error) {
 	return []byte(redactedJSON), nil
 }
 
-// Add copies one record into the bounded in-memory chunk. A failed Add does
-// not retain the supplied record and may be retried unless temporary cleanup
-// fails, in which case only Close is accepted.
+// Add copies one exact Config.RecordBytes record into the bounded chunk. The
+// caller may reuse the slice after return, but must not mutate it during Add.
+// A full chunk is sorted and encrypted to disk before Add returns. Nil store
+// or context returns ErrInvalidConfiguration; wrong width returns
+// ErrInvalidRecord, and exceeding MaximumRecords returns ErrRecordLimit.
+// Lifecycle errors are ErrConcurrentUse, ErrClosed and ErrFinalized.
+//
+// A failed Add does not accept the new record and preserves previously accepted
+// records. It may be retried after cancellation, entropy or storage failure
+// unless partial-file cleanup fails, which permits only Close. Spill retries
+// consume new nonce counters rather than reusing a failed attempt's nonce.
+// Context errors pass through; owned IO failures use payload-free sentinels.
 func (store *Store) Add(ctx context.Context, record []byte) error {
 	if store == nil || ctx == nil {
 		return ErrInvalidConfiguration
@@ -353,10 +424,25 @@ func (store *Store) Add(ctx context.Context, record []byte) error {
 	return nil
 }
 
-// ForEachSorted finalizes input and yields every record in ascending byte
-// order. Duplicate records are preserved. Once pending input is spilled, the
-// store remains finalized even when merge iteration, authentication,
-// cancellation, or the callback fails.
+// ForEachSorted finalizes input and calls yield synchronously for every record
+// in ascending full-record byte order, preserving duplicates. There is no custom
+// comparator or key-only stable-sort contract. Empty input succeeds without a
+// callback. A nil store, context or yield returns ErrInvalidConfiguration.
+//
+// Each callback slice is cleared on return, including panic; copy before
+// retaining it. Callback errors and context errors pass through unchanged and
+// callback panics propagate after plaintext is cleared and reader closure is
+// attempted. A blocked callback can delay cancellation; reentrant lifecycle
+// calls on this store are rejected, not awaited. Cancellation after the final
+// checkpoint need not turn otherwise successful iteration into an error.
+//
+// Output is not atomic: corruption, storage, cancellation or callback failure
+// can follow records already yielded. Reader-close failure can return ErrStorage
+// even after complete output; it does not override an earlier iteration error.
+// Once pending input is spilled, the store remains finalized even on failure,
+// including empty input. Further Add/ForEachSorted calls return ErrFinalized.
+// A pre-finalization failure is retryable only if cleanup has not sealed the
+// store. The caller must Close on every path; iteration does not delete chunks.
 func (store *Store) ForEachSorted(
 	ctx context.Context,
 	yield func([]byte) error,
@@ -395,9 +481,17 @@ func (store *Store) ForEachSorted(
 	return merge(ctx, readers, yield)
 }
 
-// Close clears in-memory records and removes the complete work directory.
-// It is idempotent. A storage failure leaves the store closable so cleanup can
-// be retried, but no other operation is accepted after closing begins.
+// Close clears buffered plaintext, removes the work directory and releases the
+// rooted handle. A nil Store succeeds; an unconstructed zero Store returns
+// ErrInvalidConfiguration. Close rejects active operations with ErrConcurrentUse
+// instead of waiting or interrupting them. It has no context and can block in IO.
+//
+// Once closing begins, Add/ForEachSorted return ErrClosed. A removal failure
+// returns ErrStorage and leaves only Close retryable. After successful removal,
+// state is finalized even if rooted-handle closure reports ErrStorage; later
+// Close calls return nil without retrying that handle. Otherwise repeated Close
+// is idempotent. Dropping cipher references is not secure key-memory erasure,
+// and process death can bypass cleanup entirely.
 func (store *Store) Close() error {
 	if store == nil {
 		return nil
@@ -517,6 +611,8 @@ func (store *Store) seal() {
 	store.mutex.Unlock()
 }
 
+// Check the byte product by division before allocation/multiplication; rounded
+// chunk admission bounds merge fan-in even for a partly filled final chunk.
 func validConfig(config Config) bool {
 	if config.ParentDirectory == "" ||
 		!filepath.IsAbs(config.ParentDirectory) ||
@@ -583,6 +679,9 @@ func (allocator *nonceDomainAllocator) allocate() (uint64, bool) {
 	}
 	allocator.next++
 
+	// XOR with one process seed is bijective over the sequence. It separates
+	// stores in this process even with repeated store entropy, not across
+	// restarts/processes; callers still need independent dataset keys.
 	return allocator.seed ^ allocator.next, true
 }
 
@@ -631,6 +730,8 @@ func (store *Store) spill(ctx context.Context) (result error) {
 			nonce[nonceCounterOffset:],
 			uint32(store.nonceCount),
 		)
+		// Consume before any write: a failed partial spill must never reuse this
+		// nonce when accepted records are retried (fault_campaign_test.go).
 		store.nonceCount++
 		plaintext := store.buffer.record(recordIndex)
 		aad := additionalData(
@@ -659,6 +760,8 @@ func (store *Store) spill(ctx context.Context) (result error) {
 	if err := file.Close(); err != nil {
 		return ErrStorage
 	}
+	// Only a synced, closed file enters the merge list. Uncommitted files are
+	// removed by the defer; failed cleanup seals admission to bound residue.
 	complete = true
 	store.chunks = append(store.chunks, path)
 	store.buffer.clear()
@@ -696,6 +799,9 @@ func (store *Store) expectedChunkRecords(index int) int {
 	)
 }
 
+// One plaintext record per reader is held in the heap. Pop transfers clearing
+// responsibility to the callback scope; queue.clear owns remaining plaintext
+// on every error or panic. Output already yielded cannot be rolled back.
 func merge(
 	ctx context.Context,
 	readers []*chunkReader,
@@ -743,6 +849,8 @@ func merge(
 	return nil
 }
 
+// chunkReader trusts only admitted in-memory sizes/counts, never storage length
+// headers. Its AEAD metadata pins each record to a store, chunk and ordinal.
 type chunkReader struct {
 	file            chunkFile
 	cipher          cipher.AEAD
@@ -754,6 +862,8 @@ type chunkReader struct {
 	expectedRecords uint64
 }
 
+// chunkFile is the owned synchronous IO seam. Spill closes/removes uncommitted
+// files; iteration attempts to close every reader, including on callback panic.
 type chunkFile interface {
 	io.Reader
 	io.Writer
@@ -763,6 +873,9 @@ type chunkFile interface {
 	Close() error
 }
 
+// rootDirectory anchors relative names to one revalidated directory identity.
+// Production adapters must preserve containment through ancestor renames; this
+// seam is not permission to replace rooted operations with unrestricted paths.
 type rootDirectory interface {
 	Stat(string) (os.FileInfo, error)
 	Mkdir(string, os.FileMode) error
@@ -857,6 +970,8 @@ func temporaryName(entropy io.Reader, prefix string) (string, error) {
 
 func (reader *chunkReader) next() ([]byte, error) {
 	if reader.recordIndex == reader.expectedRecords {
+		// EOF must occur at the expected record count: authenticating individual
+		// records alone would miss removal of a whole final record or appended data.
 		var trailing [1]byte
 		count, err := reader.file.Read(trailing[:])
 		if count == 0 && errors.Is(err, io.EOF) {
@@ -921,6 +1036,9 @@ func closeReaders(readers []*chunkReader) error {
 	return nil
 }
 
+// The private extsort1 AAD binds identity, nonce domain, chunk, ordinal and
+// record width in big-endian order. Source contract tests reject metadata and
+// cross-store/chunk substitutions; see docs/architecture.md for the format.
 func additionalData(
 	identity []byte,
 	nonceDomain uint64,
@@ -981,6 +1099,9 @@ func (buffer *recordBuffer) append(record []byte) {
 	buffer.data = append(buffer.data, record...)
 }
 
+// spill sorts before it can fail, so rollback must locate a matching value
+// rather than truncate the last slot. Equal records are byte-identical; removing
+// any one copy restores multiplicity without inventing input identity.
 func (buffer *recordBuffer) removeOne(record []byte) {
 	for index := 0; index < buffer.Len(); index++ {
 		if !bytes.Equal(buffer.record(index), record) {
@@ -1025,6 +1146,8 @@ func (records recordHeap) Less(left int, right int) bool {
 		records[right].record,
 	)
 	if comparison == 0 {
+		// Reader index gives a strict deterministic tie-break. Sorting compares
+		// full records, so equal values have no distinct consumer-visible key.
 		return records[left].reader < records[right].reader
 	}
 
