@@ -1,5 +1,7 @@
 # API and lifecycle
 
+[Documentation index](README.md) · [Repository entry](../README.md)
+
 `NewFactory(Config)` validates the complete storage policy. `Config` declares:
 
 - `ParentDirectory`: existing absolute non-symlink owner-only directory;
@@ -52,3 +54,6 @@ directly. Owned sentinel errors distinguish invalid configuration, unsafe
 parents, invalid keys and records, limit exhaustion, concurrent or finalized
 lifecycle misuse, entropy, storage, and authenticated corruption without
 exposing sensitive values.
+
+Choose the next guide in the [documentation index](README.md)
+or return to the [repository entry](../README.md) for installation and ownership.

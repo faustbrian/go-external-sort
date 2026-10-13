@@ -1,5 +1,7 @@
 # Adoption and migration
 
+[Documentation index](README.md) · [Repository entry](../README.md)
+
 Choose a fixed record encoding before adoption. Canonical cryptographic digests
 are a natural fit because byte ordering is deterministic and records do not
 carry secrets that require parsing during merge.
@@ -21,3 +23,6 @@ across unrelated datasets merely for convenience.
 Applications that need more than 64 chunks should partition at a semantic
 boundary or introduce a separately reviewed multi-pass design. Raising the
 fan-in or silently using unbounded memory is not a compatible workaround.
+
+Choose the next guide in the [documentation index](README.md)
+or return to the [repository entry](../README.md) for installation and ownership.

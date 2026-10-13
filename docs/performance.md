@@ -1,5 +1,7 @@
 # Performance
 
+[Documentation index](README.md) · [Repository entry](../README.md)
+
 Peak record-buffer memory is bounded by `RecordBytes * ChunkRecords`, plus the
 Go slice and merge heap overhead. The merge keeps one decrypted record and one
 file descriptor per chunk, capped at 64, plus the store's single rooted parent
@@ -22,3 +24,6 @@ intended migration host with realistic chunk and population sizes. For a
 comparison, retain at least ten raw samples from the same idle host and Go
 toolchain, then compare distributions with `benchstat`; do not gate on a
 single wall-clock sample.
+
+Choose the next guide in the [documentation index](README.md)
+or return to the [repository entry](../README.md) for installation and ownership.

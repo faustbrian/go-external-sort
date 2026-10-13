@@ -1,5 +1,7 @@
 # FAQ
 
+[Documentation index](README.md) · [Repository entry](../README.md)
+
 ## Why fixed-size records?
 
 They provide predictable allocation and encrypted record framing without a
@@ -35,3 +37,6 @@ No work is performed concurrently within one store. An overlapping call,
 including a callback that reenters the store, returns `ErrConcurrentUse`.
 Wait for the active operation to return before retrying. Separate stores from
 the same factory can run concurrently.
+
+Choose the next guide in the [documentation index](README.md)
+or return to the [repository entry](../README.md) for installation and ownership.

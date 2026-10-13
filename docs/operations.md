@@ -1,5 +1,7 @@
 # Operations and Kubernetes
 
+[Documentation index](README.md) · [Repository entry](../README.md)
+
 ## Normal shutdown
 
 The caller owns process signals. On `SIGTERM` or a pod-eviction notice, stop
@@ -67,3 +69,6 @@ its unique temporary file is fully written, synchronized, and closed.
 - Monitor cleanup failures, remaining owner namespaces, temporary bytes, and
   eviction pressure. Do not infer plaintext exposure merely from encrypted
   residue, but treat residue metadata and retained ciphertext as sensitive.
+
+Choose the next guide in the [documentation index](README.md)
+or return to the [repository entry](../README.md) for installation and ownership.

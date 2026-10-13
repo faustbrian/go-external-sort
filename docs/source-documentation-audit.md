@@ -1,5 +1,7 @@
 # Source documentation audit
 
+[Documentation index](README.md) · [Repository entry](../README.md)
+
 ## Boundary and plan
 
 Owner: repository documentation worker. Baseline:
@@ -113,3 +115,6 @@ Ordinary shared CI uses `source_documentation: check` with the immutable Tools
 v2.4.0 workflow and matching authenticated binary/checksum declaration; the
 separate native-security diagnostic retains its qualified source identity.
 Structural checks do not replace this audit or native docs/examples.
+
+Choose the next guide in the [documentation index](README.md)
+or return to the [repository entry](../README.md) for installation and ownership.

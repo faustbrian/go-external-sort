@@ -1,5 +1,7 @@
 # Architecture and encrypted chunk format
 
+[Documentation index](README.md) · [Repository entry](../README.md)
+
 Records accumulate in one contiguous byte buffer bounded by `RecordBytes *
 ChunkRecords`. The buffer is sorted lexicographically in place and spilled to a
 new chunk. This repeats until finalization, when at most 64 sorted chunks are
@@ -57,3 +59,6 @@ write, sync, or close leaves the chunk uncommitted and triggers removal.
 Abrupt process termination may leave encrypted work directories. Crash cleanup
 is an operator policy because the module cannot know whether another process
 still owns a directory. See [Operations and Kubernetes](operations.md).
+
+Choose the next guide in the [documentation index](README.md)
+or return to the [repository entry](../README.md) for installation and ownership.

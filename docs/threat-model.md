@@ -1,5 +1,7 @@
 # Threat model: go-external-sort
 
+[Documentation index](README.md) · [Repository entry](../README.md)
+
 **Model version:** 1.0 (2026-10-02).
 
 **Source baseline:** `8d834b603072ef382a85977648258ffbcc0c2cdb` on `main`.
@@ -128,3 +130,6 @@ Known caller-owned limitations are listed above. Scanner success, existing test
 names, or this model alone do not establish ecosystem security completion;
 selected scanner results and current required-check state must remain explicit
 in the coordinator's ledger.
+
+Choose the next guide in the [documentation index](README.md)
+or return to the [repository entry](../README.md) for installation and ownership.
