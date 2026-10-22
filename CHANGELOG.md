@@ -9,6 +9,12 @@
 - Document allocation, rooted storage, nonce consumption and authenticated
   framing invariants; correct the nonce/domain diagram to match current bytes.
 
+## 1.1.2 - 2026-10-22
+
+### Changed
+
+- Publish the current source and documentation with a fresh immutable tag.
+
 ## 1.1.1 - 2026-10-07
 
 ### Changed
